@@ -1,0 +1,170 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
+
+local player = Players.LocalPlayer
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.ResetOnSpawn = false
+
+-- Main UI Frame
+local mainFrame = Instance.new("Frame", gui)
+mainFrame.Size = UDim2.new(0, 400, 0, 200)
+mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.BackgroundTransparency = 0.35
+mainFrame.BorderSizePixel = 2
+mainFrame.BorderColor3 = Color3.fromRGB(30, 120, 255) -- Set border to the blue color of the start button
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 10)
+
+-- Title Label (Changed font to a bolder style)
+local titleLabel = Instance.new("TextLabel", mainFrame)
+titleLabel.Size = UDim2.new(1, 0, 0, 40)
+titleLabel.Position = UDim2.new(0, 0, 0, 22)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Enter Key"
+titleLabel.TextSize = 35
+titleLabel.Font = Enum.Font.GothamBold  -- Changed font to a bolder version
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-- Key Input
+local keyBox = Instance.new("TextBox", mainFrame)
+keyBox.Size = UDim2.new(0.8, 0, 0, 40)
+keyBox.Position = UDim2.new(0.1, 0, 0.4, 0)
+keyBox.PlaceholderText = "Enter Key Here"
+keyBox.TextSize = 20
+keyBox.Font = Enum.Font.Gotham
+keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+keyBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+keyBox.BorderSizePixel = 0
+Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0, 8)
+
+-- Start Button
+local startButton = Instance.new("TextButton", mainFrame)
+startButton.Size = UDim2.new(0.6, 0, 0, 40)
+startButton.Position = UDim2.new(0.2, 0, 0.65, 0)
+startButton.Text = "Start"
+startButton.TextSize = 20
+startButton.Font = Enum.Font.GothamSemibold
+startButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+startButton.BackgroundColor3 = Color3.fromRGB(30, 120, 255)
+startButton.BorderSizePixel = 0
+Instance.new("UICorner", startButton).CornerRadius = UDim.new(0, 8)
+
+-- By Ahmed Label
+local byLabel = Instance.new("TextLabel", mainFrame)
+byLabel.Size = UDim2.new(1, 0, 0, 20)
+byLabel.Position = UDim2.new(0, 0, 1, -25)
+byLabel.BackgroundTransparency = 1
+byLabel.Text = "By Ahmed"
+byLabel.TextSize = 14
+byLabel.Font = Enum.Font.Gotham
+byLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+
+-- Status Frame
+local statusFrame = Instance.new("Frame", gui)
+statusFrame.Size = UDim2.new(0, 300, 0, 60)
+statusFrame.Position = UDim2.new(0.5, -150, 0.75, -30)
+statusFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+statusFrame.BorderSizePixel = 2
+statusFrame.BorderColor3 = Color3.fromRGB(0, 0, 255) -- Blue outline for background
+statusFrame.Visible = false
+Instance.new("UICorner", statusFrame).CornerRadius = UDim.new(0, 12)
+
+-- Difficulty Label
+local diffLabel = Instance.new("TextLabel", statusFrame)
+diffLabel.Size = UDim2.new(1, 0, 1, 0)
+diffLabel.Position = UDim2.new(0, 0, 0, 0)
+diffLabel.BackgroundTransparency = 1
+diffLabel.TextSize = 18
+diffLabel.Font = Enum.Font.Gotham
+diffLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+diffLabel.Text = "Current Difficulty: " -- Default text
+diffLabel.TextWrapped = true
+
+-- Start Logic
+startButton.MouseButton1Click:Connect(function()
+	if keyBox.Text == "egg@645" then
+		mainFrame.Visible = false
+		statusFrame.Visible = true
+
+		-- Baby Difficulty
+		game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Credit", Text = "This script made by Lord Sudo", Duration = 5})
+		game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Script", Text = "This will take a while to unlock everything.", Duration = 5})
+
+		local args = { [1] = "Baby" }
+		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeDifficulty"):FireServer(unpack(args))
+		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RequestEggs"):InvokeServer(unpack(args))
+
+		diffLabel.Text = "Current Difficulty: Baby" -- Update text to Baby
+
+		wait(0.4)
+		for m = 1, 10 do
+			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("EggCollected"):InvokeServer()
+			wait(0.5)
+		end
+		wait(0.2)
+
+		-- Easy Difficulty
+		local args = { [1] = "Easy" }
+		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeDifficulty"):FireServer(unpack(args))
+		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RequestEggs"):InvokeServer(unpack(args))
+
+		diffLabel.Text = "Current Difficulty: Easy" -- Update text to Easy
+
+		wait(0.4)
+		for m = 1, 15 do
+			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("EggCollected"):InvokeServer()
+			wait(0.5)
+		end
+		wait(0.2)
+
+		-- Medium Difficulty
+		local args = { [1] = "Medium" }
+		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeDifficulty"):FireServer(unpack(args))
+		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RequestEggs"):InvokeServer(unpack(args))
+
+		diffLabel.Text = "Current Difficulty: Medium" -- Update text to Medium
+
+		wait(0.4)
+		for m = 1, 20 do
+			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("EggCollected"):InvokeServer()
+			wait(0.5)
+		end
+		wait(0.2)
+
+		-- Hard Difficulty
+		local args = { [1] = "Hard" }
+		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeDifficulty"):FireServer(unpack(args))
+		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RequestEggs"):InvokeServer(unpack(args))
+
+		diffLabel.Text = "Current Difficulty: Hard" -- Update text to Hard
+
+		wait(0.4)
+		for m = 1, 25 do
+			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("EggCollected"):InvokeServer()
+			wait(0.5)
+		end
+		wait(0.2)
+
+		-- Extreme Difficulty
+		local args = { [1] = "Extreme" }
+		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeDifficulty"):FireServer(unpack(args))
+		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RequestEggs"):InvokeServer(unpack(args))
+
+		diffLabel.Text = "Current Difficulty: Extreme" -- Update text to Extreme
+
+		wait(0.4)
+		for m = 1, 35 do
+			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("EggCollected"):InvokeServer()
+			wait(0.5)
+		end
+
+		game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Script", Text = "Done!", Duration = 5})
+		gui:Destroy()
+
+	else
+		keyBox.Text = ""
+		keyBox.PlaceholderText = "Wrong Key!"
+	end
+end)
