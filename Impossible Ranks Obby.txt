@@ -1,0 +1,133 @@
+-- Services
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+-- Folder containing the checkpoints
+local checkpointsFolder = workspace:WaitForChild("Checkpoints")
+
+-- GUI Setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "StageTeleporterUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 250, 0, 120)
+mainFrame.Position = UDim2.new(0.5, -125, 0.5, -60)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.BorderSizePixel = 0
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+mainFrame.Parent = screenGui
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 10)
+uiCorner.Parent = mainFrame
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 30)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Auto Obby"
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 20
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Parent = mainFrame
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0.8, 0, 0, 40)
+toggleButton.Position = UDim2.new(0.1, 0, 0, 40)
+toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+toggleButton.Text = "Start"
+toggleButton.Font = Enum.Font.Gotham
+toggleButton.TextSize = 18
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Parent = mainFrame
+
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 8)
+buttonCorner.Parent = toggleButton
+
+local creditsLabel = Instance.new("TextLabel")
+creditsLabel.Size = UDim2.new(1, 0, 0, 20)
+creditsLabel.Position = UDim2.new(0, 0, 1, -20)
+creditsLabel.BackgroundTransparency = 1
+creditsLabel.Text = "Made by a1osx_ on Discord"
+creditsLabel.Font = Enum.Font.Gotham
+creditsLabel.TextSize = 14
+creditsLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+creditsLabel.Parent = mainFrame
+
+-- Draggable Frame (PC + mobile)
+local dragging = false
+local dragInput, dragStart, startPos
+
+mainFrame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = mainFrame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+mainFrame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+-- Get fresh HumanoidRootPart every time
+local function getHumanoidRootPart()
+	local character = player.Character or player.CharacterAdded:Wait()
+	return character:WaitForChild("HumanoidRootPart")
+end
+
+-- Teleporting logic
+local isTeleporting = false
+
+local function teleportStages()
+	isTeleporting = true
+	toggleButton.Text = "Stop"
+
+	-- Wait for Stage value inside leaderstats
+	local leaderstats = player:WaitForChild("leaderstats")
+	local stageValue = leaderstats:WaitForChild("Stage")
+	local currentStage = stageValue.Value
+
+	for i = currentStage, 221 do
+		if not isTeleporting then break end
+
+		local checkpoint = checkpointsFolder:FindFirstChild(tostring(i))
+		if checkpoint and checkpoint:IsA("BasePart") then
+			local rootPart = getHumanoidRootPart()
+			rootPart.CFrame = checkpoint.CFrame + Vector3.new(0, 3, 0)
+			task.wait(0.65)
+		end
+	end
+
+	isTeleporting = false
+	toggleButton.Text = "Start"
+end
+
+-- Button Click
+toggleButton.MouseButton1Click:Connect(function()
+	if not isTeleporting then
+		teleportStages()
+	else
+		isTeleporting = false
+		toggleButton.Text = "Start"
+	end
+end)

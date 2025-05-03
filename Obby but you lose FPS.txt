@@ -1,0 +1,117 @@
+-- Place this in StarterPlayerScripts
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local checkpoints = workspace:WaitForChild("Checkpoints")
+
+-- UI Setup
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "AutoObbyUI"
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 280, 0, 120)
+frame.Position = UDim2.new(0.5, -140, 0.2, 0)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 60)
+frame.Active = true
+frame.Draggable = true
+
+local stroke = Instance.new("UIStroke", frame)
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(0, 140, 255)
+
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+local stageLabel = Instance.new("TextLabel", frame)
+stageLabel.Size = UDim2.new(1, -20, 0, 25)
+stageLabel.Position = UDim2.new(0, 10, 0, 10)
+stageLabel.BackgroundTransparency = 1
+stageLabel.TextScaled = true
+stageLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+stageLabel.Font = Enum.Font.Cartoon
+stageLabel.Text = "Stage: ?"
+
+local button = Instance.new("TextButton", frame)
+button.Size = UDim2.new(1, -40, 0, 30)
+button.Position = UDim2.new(0, 20, 0, 45)
+button.BackgroundColor3 = Color3.fromRGB(60, 100, 255)
+button.TextColor3 = Color3.new(1, 1, 1)
+button.Font = Enum.Font.GothamBold
+button.TextScaled = true
+button.Text = "Start Auto"
+
+-- Rounded corners for button
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 4)
+
+local credits = Instance.new("TextLabel", frame)
+credits.Size = UDim2.new(1, -20, 0, 20)
+credits.Position = UDim2.new(0, 10, 1, -25)
+credits.BackgroundTransparency = 1
+credits.TextScaled = true
+credits.TextColor3 = Color3.fromRGB(255, 255, 255)
+credits.Font = Enum.Font.Gotham
+credits.Text = "Credits: a1osx_ on discord"
+
+-- Auto logic
+local autoRunning = false
+
+local function getMaxCheckpoint()
+	local max = 0
+	for _, part in ipairs(checkpoints:GetChildren()) do
+		local num = tonumber(part.Name)
+		if num and num > max then
+			max = num
+		end
+	end
+	return max
+end
+
+local function getStageValue()
+	local leaderstats = player:FindFirstChild("leaderstats")
+	if leaderstats and leaderstats:FindFirstChild("Stage") then
+		return leaderstats.Stage.Value
+	end
+	return 1
+end
+
+local function teleportToCheckpoints()
+	autoRunning = true
+	button.Text = "Stop Auto"
+
+	local maxCheckpoint = getMaxCheckpoint()
+	local startFrom = getStageValue()
+
+	for i = startFrom, maxCheckpoint do
+		if not autoRunning then break end
+		local cp = checkpoints:FindFirstChild(tostring(i))
+		if cp then
+			local char = player.Character or player.CharacterAdded:Wait()
+			local hrp = char:WaitForChild("HumanoidRootPart", 1)
+			if hrp then
+				hrp.CFrame = cp.CFrame + Vector3.new(0, 3, 0)
+			end
+		end
+		stageLabel.Text = "Stage: " .. i
+		task.wait(0.6)
+	end
+
+	button.Text = "Start Auto"
+	autoRunning = false
+end
+
+button.MouseButton1Click:Connect(function()
+	if autoRunning then
+		autoRunning = false
+		button.Text = "Start Auto"
+	else
+		teleportToCheckpoints()
+	end
+end)
+
+-- Update stage display on load
+RunService.RenderStepped:Connect(function()
+	local stage = getStageValue()
+	stageLabel.Text = "Stage: " .. stage
+end)
